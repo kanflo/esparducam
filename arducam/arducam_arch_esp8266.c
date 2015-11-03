@@ -138,8 +138,8 @@ uint8_t arducam_spi_read(uint8_t address)
 
 	spi_tx8(iHSPI, data[0]);
 
-	spi_chip_unselect(ARDUCAM_CS); // The HW SPI does this
-	spi_chip_select(ARDUCAM_CS);
+//	spi_chip_unselect(ARDUCAM_CS); // The HW SPI does this but things does not work if we do the same
+//	spi_chip_select(ARDUCAM_CS);
 
 	data[1] = (uint8_t) spi_rx8(iHSPI);
 //	hspi_TxRx(ARDUCAM_CS, data, sizeof(data));
