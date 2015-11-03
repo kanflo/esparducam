@@ -48,15 +48,9 @@ static void spi_chip_select(uint8_t cs_pin);
 static void spi_chip_unselect(uint8_t cs_pin);
 
 
-
-
 bool arducam_spi_init(void)
 {
 	printf("arducam_spi_init\n");
-//    spi_chip_select(ARDUCAM_CS);
-//    spi_chip_unselect(ARDUCAM_CS);
-
-
 #ifdef GPIO16_HACK
     if (ARDUCAM_CS == 16) {
     	printf("ARDUCAM_CS is GPIO 16\n");
@@ -88,7 +82,6 @@ bool arducam_spi_init(void)
 	esp8266_digital16Write(0); arducam_delay_ms(10);
 	esp8266_digital16Write(1); arducam_delay_ms(10);
 #endif // GPIO16_HACK
-//	hspi_init(32); // Slow
 	return true;
 }
 
@@ -131,30 +124,18 @@ void arducam_spi_write(uint8_t address, uint8_t value)
 uint8_t arducam_spi_read(uint8_t address)
 {
 	uint8_t data[2] = {address, 0x00};
-
 	spi_chip_select(ARDUCAM_CS);
-
-//	data[1] = spi_transaction(iHSPI, 0, 0, 0, 0, 8, (uint32_t) address, 8, 0);
-
 	spi_tx8(iHSPI, data[0]);
-
 //	spi_chip_unselect(ARDUCAM_CS); // The HW SPI does this but things does not work if we do the same
 //	spi_chip_select(ARDUCAM_CS);
-
 	data[1] = (uint8_t) spi_rx8(iHSPI);
-//	hspi_TxRx(ARDUCAM_CS, data, sizeof(data));
-//	printf(">>> SPI read %02x from %02x\n", data[1], address);
 	spi_chip_unselect(ARDUCAM_CS);
-//	printf(".");
-//	printf("arducam_spi_read: 0x%02x = [0x%02x]\n", data[1], address & 0x7f);
   	return data[1];
 }
 
 uint8_t arducam_i2c_write(uint8_t regID, uint8_t regDat)
 {
 	uint8_t data[] = {regID, regDat};
-	//printf(" arducam_i2c_write : [0x%02x] = 0x%02x\n", regID, regDat);
-//	arducam_delay_ms(10);
 	return i2c_slave_write(_sensor_addr, data, sizeof(data));
 }
 
@@ -244,9 +225,6 @@ int arducam_i2c_write_word_regs(const struct sensor_reg reglist[])
 
 static void spi_chip_select(uint8_t cs_pin)
 {
-//    delay_ms(5);
-//    printf("> select %d\n", cs_pin);    
-//    printf(">\n");
 #ifdef GPIO16_HACK
     if (ARDUCAM_CS == 16)
 		esp8266_digital16Write(0);
@@ -257,11 +235,6 @@ static void spi_chip_select(uint8_t cs_pin)
 
 static void spi_chip_unselect(uint8_t cs_pin)
 {
-//    for (volatile int i = 0; i < 100; i++) ;
-//    printf("..");
-//    printf("\n"); // <--- makes it work :-/
-//    printf("< unselect %d\n", cs_pin);
-//    delay_ms(5);
 #ifdef GPIO16_HACK
     if (ARDUCAM_CS == 16)
 		esp8266_digital16Write(1);
