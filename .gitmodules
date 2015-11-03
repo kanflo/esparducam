@@ -1,3 +1,0 @@
-[submodule "esp-open-rtos-driver-i2c"]
-	path = esp-open-rtos-driver-i2c
-	url = https://github.com/kanflo/esp-open-rtos-driver-i2c.git
