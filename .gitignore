@@ -1,2 +1,4 @@
 local.h
-
+build/
+firmware/
+ssid_config.h
