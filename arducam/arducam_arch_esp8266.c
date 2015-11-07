@@ -60,18 +60,6 @@ bool arducam_spi_init(void)
 #endif // GPIO16_HACK
 	gpio_enable(ARDUCAM_CS, GPIO_OUTPUT);
     gpio_write(ARDUCAM_CS, 1);
-/*
-    gpio_write(ARDUCAM_CS, 1); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 0); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 1); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 0); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 1); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 0); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 1); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 0); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 1); arducam_delay_ms(10);
-    gpio_write(ARDUCAM_CS, 0); arducam_delay_ms(10);
-*/
 	spi_init(iHSPI);
 
 #ifdef GPIO16_HACK
