@@ -7809,7 +7809,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </libraries>
 <attributes>
 <attribute name="CNAME" value="A two component webcam"/>
-<attribute name="CREVISION" value="0.1"/>
+<attribute name="CREVISION" value="1"/>
 <attribute name="DESIGNER" value="Johan Kanflo"/>
 </attributes>
 <variantdefs>
