@@ -1,3 +1,27 @@
+/* 
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2015 Johan Kanflo (github.com/kanflo)
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #include "espressif/esp_common.h"
 #include "espressif/sdk_private.h"
 #include <espressif/esp_misc.h>
@@ -21,13 +45,9 @@
 
 
 //#define CONFIG_NO_WIFI
-//#define CONFIG_NO_ARDUCAM
 #define CONFIG_NO_PIR
-#define CONFIG_NO_CLI
 
-#define ARDUCAM_PWR  (4) // Arducam Mini power enable
-#define FLASH_CS     (5) // SPI flash CS
-#define ARDUCAM_CS  (15) // Arducam Mini SPI CS
+#define ARDUCAM_PWR  (15) // Arducam Mini power enable
 
 
 #define OV2640_CHIPID_HIGH  0x0A
@@ -40,29 +60,6 @@
 #define BUF_SIZE (200)
 static char buffer[BUF_SIZE];
 
-
-#ifndef CONFIG_NO_CLI
-
-void cli_task(void *p)
-{
-    printf(TIME_MARKER "CLI task\n", systime_ms());
-
-    static char cmd[81];
-    int i = 0;
-    while(1) {
-        char ch = get_char();
-        printf("%c", ch);
-        if (ch != '\n') {
-            if (i < sizeof(cmd)) cmd[i++] = ch;
-        } else {
-            cmd[i] = 0;
-            printf("'%s'\n", cmd);
-//            handle_command((char*) cmd);
-            i = 0;
-        }
-    }
-}
-#endif // CONFIG_NO_CLI
 
 static bool arducam_setup(void)
 {
@@ -82,7 +79,6 @@ static bool arducam_setup(void)
 //    arducam_write_reg(ARDUCHIP_MODE, 0x00);
 
     // Check if the camera module type is OV2640
-#if 1
     arducam_i2c_read(OV2640_CHIPID_HIGH, &vid);
     arducam_i2c_read(OV2640_CHIPID_LOW, &pid);
     if((vid != 0x26) || (pid != 0x42)) {
@@ -91,7 +87,6 @@ static bool arducam_setup(void)
     } else {
         printf(TIME_MARKER "OV2640 detected\n", systime_ms());
     }
-#endif
     printf(TIME_MARKER "Setting JPEG\n", systime_ms());
     arducam_set_format(fmtJPEG);
     printf(TIME_MARKER "Init\n", systime_ms());
@@ -165,21 +160,6 @@ static void arudcam_fifo_read(int client_sock)
     printf("[%8u] Done, read %u bytes in %ums\n", systime_ms(), bytes_read, systime_ms()-start_time);
 }
 
-void cam_task(void *p)
-{
-    do {
-        if (!arducam_setup())
-            break;
-        if (!arducam_capture())
-            break;
-        arudcam_fifo_read(0);
-    } while(0);
-
-    while(1) {
-        delay_ms(1000);
-    }
-}
-
 #ifndef CONFIG_NO_PIR
 extern uint16_t sdk_system_adc_read(void);
 
@@ -215,8 +195,6 @@ void pir_task(void *p)
 }
 #endif // CONFIG_NO_PIR
 
-
-#ifndef CONFIG_NO_ARDUCAM
 void server_task(void *p)
 {
     bool camera_ok = false;
@@ -302,7 +280,6 @@ void server_task(void *p)
         } while (0);
     }
 }
-#endif // CONFIG_NO_ARDUCAM
 
 void user_init(void)
 {
@@ -326,17 +303,8 @@ void user_init(void)
     gpio_enable(ARDUCAM_PWR, GPIO_OUTPUT);
     gpio_write(ARDUCAM_PWR, 1);
 
-//    xTaskCreate(&cam_task, (signed char *) "cam_task", 256, NULL, 2, NULL);
-#ifndef CONFIG_NO_ARDUCAM
     xTaskCreate(&server_task, (signed char *) "server_task", 256, NULL, 2, NULL);
-#endif // CONFIG_NO_ARDUCAM
-
 #ifndef CONFIG_NO_PIR
     xTaskCreate(&pir_task, (signed char *) "pir_task", 256, NULL, 2, NULL);
 #endif // CONFIG_NO_PIR
-
-#ifndef CONFIG_NO_CLI
-    xTaskCreate(&cli_task, (signed char *) "cli_task", 256, NULL, 2, NULL);
-#endif // CONFIG_NO_CLI
-
 }
