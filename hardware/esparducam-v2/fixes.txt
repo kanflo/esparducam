@@ -1,0 +1,17 @@
+[X] Fix footprint of barrel connector.
+[X] Fix swapped UART RX/TX pins.
+[X] Move CAM_CS to GPIO 4.
+[X] Move CAM_PWR to GPIO 15.
+[X] Fix FTDI connector silk.
+[X] Investigate a P-mosfet cutting power on the high side (check Harizanov's Funky with RFM12).
+[X] NCP1117 GND pin not directly routed to GND plane.
+[X] Skip SJ2.
+[X] Investigate VCC filtering.
+[X] Add label for flash size under the board in the same manner as the "ESP type" label.
+[X] Add label "Flash" under the SPI flash.
+[X] Replace BOOT label with FLASH.
+[X] Check GPIO4 and GPIO5 (is the correct order TX, RX, GPIO5, GPIO4, ... ?)
+[ ] Make the ESP12e pads 1mm wider
+[X] Remove R6
+[X] Check footprint of Q1 (seems to small)
+[X] Add a schottky diode for reverse voltage protection and SJ bypass
