@@ -28,19 +28,21 @@ Issues found
  - ArduCAM Mini has a pullup on its CS pin which is connected to GPIO15. The ESP will not boot with the ACAM module attached. Fix is to move CAM_CS to GPIO4.
  - One of the ESP modules had a broken Wifi antenna. Need a way to verify modules prior to mounting.
  - FTDI connector silk is ugly
-
+ - Wrong footprint for Q1, selected SOT-323 instead of SOT-23. Luckily solder will make a '23 sit on the '323 pads :)
 
 Planned changes for v2
- - Fix footprint of barrel connector.
- - Fix swapped UART RX/TX pins.
- - Fix FTDI connector silk.
- - Add label "Flash" under the SPI flash.
- - Replace BOOT label with FLASH.
- - Investigate a P-mosfet cutting power on the high side (check Harizanov's Funky with RFM12).
- - Move CAM_CS to GPIO 4.
- - Move CAM_PWR to GPIO 15.
- - NCP1117 GND pin not directly routed to GND plane.
- - Skip SJ2.
- - Investigate VCC filtering.
- - Add a big cap for power stability.
- - Add label for flash size under the board in the same manner as the "ESP type" label.
+ + Fix footprint of barrel connector.
+ + Fix swapped UART RX/TX pins.
+ + Fix FTDI connector silk.
+ + Add label "Flash" under the SPI flash.
+ + Replace BOOT label with FLASH.
+ + Replace N-mosfet with a P-mosfet cutting power on the high side (check Harizanov's Funky with RFM12).
+ + Move CAM_CS to GPIO 4.
+ + Move CAM_PWR to GPIO 15.
+ + NCP1117 GND pin not directly routed to GND plane.
+ + Move SJ1 to the back side
+ + Skip SJ2
+ + Add protective diode with SJ bypass
+ + Place 0.1uF, 1uF & 10uF close to ESP VCC
+ + Add label for flash size under the board in the same manner as the "ESP type" label.
+ + Change footprint for Q1 to SOT-23
