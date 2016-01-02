@@ -20,7 +20,7 @@
 <layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="yes"/>
 <layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
-<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
@@ -32,9 +32,9 @@
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="yes"/>
 <layer number="37" name="tTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="38" name="bTest" color="7" fill="1" visible="no" active="yes"/>
-<layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="yes"/>
+<layer number="39" name="tKeepout" color="4" fill="11" visible="yes" active="yes"/>
 <layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="yes"/>
-<layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="yes"/>
+<layer number="41" name="tRestrict" color="4" fill="10" visible="yes" active="yes"/>
 <layer number="42" name="bRestrict" color="1" fill="10" visible="no" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
@@ -177,10 +177,6 @@
 <text x="33.370815625" y="42.82904375" size="0.8128" layer="25" ratio="15" rot="R90">C1</text>
 <text x="20.691815625" y="8.19243125" size="0.8128" layer="25" ratio="15">C2</text>
 <text x="25.268375" y="8.1812375" size="0.8128" layer="25" ratio="15">R5</text>
-<text x="25.709946875" y="20.42736875" size="1.27" layer="25" ratio="15" align="center">ESP-07
-or
-ESP-12
-goes here</text>
 <text x="43.047603125" y="15.4893" size="1.016" layer="25" ratio="15" rot="R315" align="top-left">15 CAM PWR</text>
 <text x="43.065834375" y="23.1138" size="1.016" layer="25" ratio="15" rot="R315" align="top-left">4 CAM CS</text>
 <text x="43.039090625" y="25.644796875" size="1.016" layer="25" ratio="15" rot="R315" align="top-left">5 FLASH CS</text>
@@ -196,8 +192,8 @@ goes here</text>
 <text x="31.342" y="27.054" size="1.778" layer="26" ratio="15" rot="MR0">ESP type</text>
 <text x="32.843" y="17.249" size="1.778" layer="26" ratio="15" rot="MR0">Flash size</text>
 <rectangle x1="17.526" y1="10.258" x2="33.274" y2="16.481" layer="26"/>
-<text x="4.572" y="35.814" size="1.778" layer="25">+</text>
-<text x="4.699" y="32.385" size="1.778" layer="25">-</text>
+<text x="4.572" y="35.814" size="1.778" layer="25" ratio="15">+</text>
+<text x="4.699" y="32.385" size="1.778" layer="25" ratio="15">-</text>
 <wire x1="9.652" y1="10.795" x2="14.605" y2="10.795" width="0.254" layer="21"/>
 <wire x1="36.322" y1="10.795" x2="41.275" y2="10.795" width="0.254" layer="21"/>
 <wire x1="11.48" y1="12.7" x2="12.6" y2="12.7" width="0.254" layer="21"/>
@@ -224,6 +220,7 @@ goes here</text>
 <text x="6.382815625" y="38.89943125" size="0.8128" layer="25" ratio="15">R6</text>
 <text x="1.006815625" y="30.16343125" size="1.27" layer="25" ratio="15">PIR</text>
 <text x="46.308" y="41.962" size="0.8128" layer="26" ratio="15" rot="MR0">SJ2</text>
+<text x="4.672" y="34.114" size="1.4" layer="25" ratio="15">S</text>
 </plain>
 <libraries>
 <library name="adafruit">
@@ -2666,10 +2663,4 @@ This connector mates with an FTDI adapter using a straight ribbon cable.</descri
 </signals>
 </board>
 </drawing>
-<compatibility>
-<note version="6.3" minversion="6.2.2" severity="warning">
-Since Version 6.2.2 text objects can contain more than one line,
-which will not be processed correctly with this version.
-</note>
-</compatibility>
 </eagle>
