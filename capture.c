@@ -38,6 +38,9 @@
 #include <espressif/sdk_private.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "camdriver.h"
+#include "cli.h"
+#include "timeutils.h"
 
 #include <ssid_config.h>
 
@@ -48,116 +51,10 @@
 
 #define ARDUCAM_PWR  (15) // Arducam Mini power enable
 
-
-#define OV2640_CHIPID_HIGH  0x0A
-#define OV2640_CHIPID_LOW   0x0B
-
-#define delay_ms(t) vTaskDelay((t) / portTICK_RATE_MS)
-#define systime_ms() (xTaskGetTickCount()*portTICK_RATE_MS)
-#define TIME_MARKER "[%8u] "
-
 #define BUF_SIZE (200)
 static char buffer[BUF_SIZE];
 
 
-static bool arducam_setup(void)
-{
-    uint8_t vid, pid, temp;
-
-    arducam(smOV2640);
-    printf("portTICK_RATE_MS is at %u\n", portTICK_RATE_MS);
-    // Check if the ArduCAM SPI bus is OK
-    arducam_write_reg(ARDUCHIP_TEST1, 0x55);
-    temp = arducam_read_reg(ARDUCHIP_TEST1);
-    if(temp != 0x55) {
-        printf(TIME_MARKER "SPI interface error (got 0x%02x)!\n", systime_ms(), temp);
-        return false;
-    }
-
-    // Change MCU mode
-//    arducam_write_reg(ARDUCHIP_MODE, 0x00);
-
-    // Check if the camera module type is OV2640
-    arducam_i2c_read(OV2640_CHIPID_HIGH, &vid);
-    arducam_i2c_read(OV2640_CHIPID_LOW, &pid);
-    if((vid != 0x26) || (pid != 0x42)) {
-        printf(TIME_MARKER "Error: cannot find OV2640 module (got 0x%02x, 0x%02x)\n", systime_ms(), vid, pid);
-        return false;
-    } else {
-        printf(TIME_MARKER "OV2640 detected\n", systime_ms());
-    }
-    printf(TIME_MARKER "Setting JPEG\n", systime_ms());
-    arducam_set_format(fmtJPEG);
-    printf(TIME_MARKER "Init\n", systime_ms());
-    arducam_init(); // Note to self. Must call set_format before init.
-    printf(TIME_MARKER "Setting size\n", systime_ms());
-    arducam_set_jpeg_size(sz640x480);
-    // Allow for auto exposure loop to adapt to after resolution change
-    printf(TIME_MARKER "Autoexposure working...\n", systime_ms());
-    delay_ms(1000);
-    printf(TIME_MARKER "Done...\n", systime_ms());
-    return true;
-}
-
-static bool arducam_capture(void)
-{
-    uint8_t temp;
-    uint32_t start_time = systime_ms();
-
-//    arducam_flush_fifo(); // TODO: These are the same
-    arducam_clear_fifo_flag(); // TODO: These are the same
-    printf(TIME_MARKER "Start capture\n", systime_ms());
-    arducam_start_capture();
-    temp = arducam_read_reg(ARDUCHIP_TRIG);
-    if (!temp) {
-        printf(TIME_MARKER "Failed to start capture!\n", systime_ms());
-        return false;
-    } else {
-        while (!(arducam_read_reg(ARDUCHIP_TRIG) & CAP_DONE_MASK)) {
-            delay_ms(1);
-        }
-        printf(TIME_MARKER "Capture done after %ums\n", systime_ms(), systime_ms()-start_time);
-    }
-    return true;
-}
-
-static void arudcam_fifo_read(int client_sock)
-{
-    uint8_t temp, temp_last = 0, buf_idx = 0;
-    uint32_t fifo_size, bytes_read, start_time = systime_ms();
-
-    fifo_size = (arducam_read_reg(0x44) << 16) | (arducam_read_reg(0x43) << 8) | (arducam_read_reg(0x42));
-    printf(TIME_MARKER "%u bytes in fifo, according to camera\n", systime_ms(), fifo_size); 
-
-    bytes_read = 1;
-    temp = arducam_read_fifo();
-//    printf("%02x ", temp);
-    buffer[buf_idx++] = temp;
-    // Read JPEG data from FIFO
-    while((temp != 0xd9) | (temp_last != 0xff)) {
-        temp_last = temp;
-        temp = arducam_read_fifo();
-        buffer[buf_idx++] = temp;
-        if (client_sock && buf_idx == BUF_SIZE) {
-            int res = write(client_sock, buffer, buf_idx);
-            if (res < 0) {
-                printf("\nERROR: write returned %d\n", res);
-                break;
-            }
-            buf_idx = 0;
-        }
-        bytes_read++;
-        if (bytes_read > fifo_size) {
-            printf("[%8u] Fifo error\n", systime_ms());
-            break;
-        }
-    }
-    if (client_sock && buf_idx > 0) {
-        int res =  write(client_sock, buffer, buf_idx);
-        (void) res;
-    }
-    printf("[%8u] Done, read %u bytes in %ums\n", systime_ms(), bytes_read, systime_ms()-start_time);
-}
 
 #ifndef CONFIG_NO_PIR
 extern uint16_t sdk_system_adc_read(void);
@@ -165,7 +62,7 @@ extern uint16_t sdk_system_adc_read(void);
 void pir_task(void *p)
 {
     delay_ms(1000);
-    printf(TIME_MARKER "PIR task\n", systime_ms());
+    printf("PIR task\n");
 
     uint16_t threshold = 500;
 //    uint8_t pir_pin = 16;
@@ -178,7 +75,7 @@ void pir_task(void *p)
         uint32_t adc = sdk_system_adc_read();
         bool new_state = adc > threshold;
         if (new_state != old_state) {
-            printf(TIME_MARKER "%s [%u]\n", systime_ms(), new_state ? "Motion" : "No motion", adc); 
+            printf("%s [%u]\n", new_state ? "Motion" : "No motion", adc); 
             old_state = new_state;
         }
         delay_ms(10);
@@ -186,7 +83,7 @@ void pir_task(void *p)
 #if 0
 //        gpio_write(pir_pin, old_state);
         __digitalWrite(pir_pin, old_state);
-        printf(TIME_MARKER "%s\n", systime_ms(), old_state ? "On" : "Off"); 
+        printf("%s\n", old_state ? "On" : "Off"); 
         old_state = !old_state;
         delay_ms(5000);
 #endif
@@ -200,7 +97,7 @@ void server_task(void *p)
 
     // Power cycle the the camera
     gpio_enable(ARDUCAM_PWR, GPIO_OUTPUT);
-    printf(TIME_MARKER "Camera power cycle\n", systime_ms());
+    printf("Camera power cycle\n");
     gpio_write(ARDUCAM_PWR, 1);
     delay_ms(250);
     gpio_write(ARDUCAM_PWR, 0);
@@ -208,7 +105,7 @@ void server_task(void *p)
 
     camera_ok = arducam_setup();
     if (!camera_ok) {
-        printf(TIME_MARKER "Camera init failed!\n", systime_ms()); 
+        printf("Camera init failed!\n"); 
     }
 
     while (1) {
@@ -224,19 +121,19 @@ void server_task(void *p)
 
         do {
             if (-1 == (server_sock = socket(AF_INET, SOCK_STREAM, 0))) {
-                printf(TIME_MARKER "Socket error\n", systime_ms());
+                printf("Socket error\n");
                 break;
             }
 
             if (-1 == bind(server_sock, (struct sockaddr *)(&server_addr), sizeof(struct sockaddr))) {
-                printf(TIME_MARKER "bind fail\n", systime_ms());
+                printf("bind fail\n");
                 break;
             }
 
-            printf(TIME_MARKER " bind port: %d\n", systime_ms(), ntohs(server_addr.sin_port));
+            printf(" bind port: %d\n", ntohs(server_addr.sin_port));
 
             if (-1 == listen(server_sock, 5)) {
-                printf(TIME_MARKER "listen fail\n", systime_ms());
+                printf("listen fail\n");
                 break;
             }
 
@@ -244,15 +141,15 @@ void server_task(void *p)
 
             for (;;) {
                 if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
-                    printf(TIME_MARKER "accept fail\n", systime_ms());
+                    printf("accept fail\n");
                     continue;
                 }
 
-                printf(TIME_MARKER "Client from %s:%d\n", systime_ms(), inet_ntoa(client_addr.sin_addr), htons(client_addr.sin_port));
+                printf("Client from %s:%d\n", inet_ntoa(client_addr.sin_addr), htons(client_addr.sin_port));
 
                 int opt = 50;
                 if (lwip_setsockopt(client_sock, SOL_SOCKET, SO_RCVTIMEO, &opt, sizeof(int)) < 0) {
-                    printf(TIME_MARKER "failed to set timeout on socket\n", systime_ms());
+                    printf("failed to set timeout on socket\n");
                 }
                 while ((recbytes = read(client_sock, buffer, BUF_SIZE)) > 0) {
                     buffer[recbytes] = 0;
@@ -269,14 +166,14 @@ void server_task(void *p)
                             if (success) {
                                 break;
                             } else {
-                                printf(TIME_MARKER "Capture retry\n", systime_ms()); 
+                                printf("Capture retry\n"); 
                                 delay_ms(10); // Arbitrary value
                             }
                         }
                         if (success) {
-                            printf(TIME_MARKER "Reading fifo\n", systime_ms()); 
-                            arudcam_fifo_read(client_sock);
-                            printf("[%8u] ---\n", systime_ms());
+                            printf("Reading fifo\n"); 
+                            arudcam_fifo_to_socket(client_sock);
+                            printf("---\n");
                         }
                     }
                 }
@@ -294,6 +191,7 @@ void user_init(void)
     sdk_uart_div_modify(0, UART_CLK_FREQ / 115200);
     printf("\n\n\n");
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
+    cli_init();
 
 #ifndef CONFIG_NO_WIFI
     struct sdk_station_config config = {
