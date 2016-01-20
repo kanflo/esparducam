@@ -40,7 +40,7 @@ void arudcam_fifo_to_socket(int client_sock);
 // Read FIFO and write to, well, nowhere
 void arudcam_fifo_to_devnull(void);
 
-// Read FIFO and hyyp upload to host:port
+// Read FIFO and http upload to host:port
 void arudcam_upload_fifo(char *host, uint16_t port);
 
 #endif // _CAMDRIVER_H_

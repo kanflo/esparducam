@@ -25,6 +25,7 @@
 #include <arducam.h>
 #include <unistd.h>
 #include <string.h>
+#include <lwip/sockets.h> // write(...) will dump to uart if this include is missing :-/
 #include <http_upload.h>
 #include "timeutils.h"
 #include "camdriver.h"
