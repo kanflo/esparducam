@@ -48,11 +48,43 @@ static void cmd_capture(uint32_t argc, char *argv[])
     }
 }
 
+static void cmd_set_size(uint32_t argc, char *argv[])
+{
+    if (argc == 2) {
+        jpeg_size_t size;
+        if (strcmp(argv[1], "160x120") == 0) size = sz160x120;
+        else if (strcmp(argv[1], "320x240") == 0) size = sz320x240;
+        else if (strcmp(argv[1], "640x480") == 0) size = sz640x480;
+        else if (strcmp(argv[1], "800x600") == 0) size = sz800x600;
+        else if (strcmp(argv[1], "1024x768") == 0) size = sz1024x768;
+        else if (strcmp(argv[1], "1280x1024") == 0) size = sz1280x1024;
+        else if (strcmp(argv[1], "1600x1200") == 0) size = sz1600x1200;
+        else {
+            printf("Error: unknown JPEG size, valid sizes are:\n");
+            printf("  160x120\n");
+            printf("  320x240\n");
+            printf("  640x480\n");
+            printf("  800x600\n");
+            printf("  1024x768\n");
+            printf("  1280x1024\n");
+            printf("  1600x1200\n");
+            return;
+        }
+        arducam_set_jpeg_size(size);
+        // Allow for auto exposure loop to adapt to after resolution change
+        printf("ok\n");
+
+    } else {
+        printf("Error: missing image size.\n");
+    }
+}
+
 static void cmd_capture_upload(uint32_t argc, char *argv[])
 {
     if (argc == 2) {
         if (arducam_capture()) {
             arudcam_upload_fifo(argv[1], 8000);
+            printf("ok\n");
         } else {
             printf("Capture failed\n");
         }
@@ -91,6 +123,7 @@ static void cmd_off(uint32_t argc, char *argv[])
 
 static void cmd_help(uint32_t argc, char *argv[])
 {
+    printf("size:<size>                           Set JPEG size (see below)\n");
     printf("upload:<hostname>                     Capture and upload image to host\n");
     printf("capture                               Capture image to '/dev/null'\n");
     printf("on:<gpio number>[:<gpio number>]+     Set gpio to 1\n");
@@ -99,6 +132,14 @@ static void cmd_help(uint32_t argc, char *argv[])
     printf("  upload:172.16.3.107<enter> captures and uploads image to host running server.py\n");
     printf("  on:0<enter> switches on gpio 0\n");
     printf("  on:0:2:4<enter> switches on gpios 0, 2 and 4\n");
+    printf("Valid JPEG sizes are:\n");
+    printf("   160x120\n");
+    printf("   320x240\n");
+    printf("   640x480\n");
+    printf("   800x600\n");
+    printf("   1024x768\n");
+    printf("   1280x1024\n");
+    printf("   1600x1200\n");
 }
 
 static void handle_command(char *cmd)
@@ -119,6 +160,7 @@ static void handle_command(char *cmd)
 
     if (strlen(argv[0]) > 0) {
         if (strcmp(argv[0], "help") == 0) cmd_help(argc, argv);
+        else if (strcmp(argv[0], "size") == 0) cmd_set_size(argc, argv);
         else if (strcmp(argv[0], "capture") == 0) cmd_capture(argc, argv);
         else if (strcmp(argv[0], "upload") == 0) cmd_capture_upload(argc, argv);
         else if (strcmp(argv[0], "on") == 0) cmd_on(argc, argv);
