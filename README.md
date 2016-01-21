@@ -3,7 +3,11 @@
 
 This repository contains code and schematics to build a development board joining the ESP8266 with the [Arducam Mini](http://www.arducam.com/arducam-mini-released/) module. Build surveillance cameras, read your water meter, attach one to your kite.
 
-The board design allows for small breakout boards to be attached. There currently is [a breakout board the the RFM69C](https://github.com/kanflo/esparducam/hardware/ism-boardlet), [an ESP12 board with pogo pins](https://github.com/kanflo/esparducam/hardware/esp-pinlet) and [one for swappable ESP12 modules](https://github.com/kanflo/esparducam/hardware/esp-boardlet).
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kanflo/esparducam/master/esparducam.jpg" alt="Esparducam board"/>
+</p>
+
+The board design allows for small breakout boards to be attached. There currently is [a breakout board the the RFM69C](https://github.com/kanflo/esparducam/tree/master/hardware/ism-boardlet), [an ESP12 board with pogo pins](https://github.com/kanflo/esparducam/tree/master/hardware/esp-pinlet) and [one for swappable ESP12 modules](https://github.com/kanflo/esparducam/tree/master/hardware/esp-boardlet).
 
 
 ###Usage
