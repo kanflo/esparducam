@@ -45,6 +45,8 @@ When flashing has completed, open a serial terminal to learn the IP number of yo
 
 Start the python script ```server.py``` and type ```upload:<your IP>``` to capture, upload and display an image on your computer.
 
+If you connect a [PIR module](http://www.ebay.com/sch/i.html?_trksid=PIR+module.TRS0&_nkw=PIR+module&_sacat=0) [eBay] to the JST connector you can use the command ```motion:on:<your ip>``` to have the board capture and upload an image when motion is detected.
+
 ###Limitations
 
 This is work in progress and there is currently very little error handling. Simultaneous clients will break the camera demo.

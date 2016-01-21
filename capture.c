@@ -47,7 +47,7 @@
 
 
 //#define CONFIG_NO_WIFI
-#define CONFIG_NO_PIR
+//#define CONFIG_NO_PIR
 
 #define ARDUCAM_PWR  (15) // Arducam Mini power enable
 
@@ -65,28 +65,27 @@ void pir_task(void *p)
     printf("PIR task\n");
 
     uint16_t threshold = 500;
-//    uint8_t pir_pin = 16;
     bool old_state = false;
-//    gpio_enable(pir_pin, GPIO_OUTPUT);
-//    old_state = gpio_read(pir_pin);
-//    __pinMode(pir_pin, INPUT);
 
     while(1) {
-        uint32_t adc = sdk_system_adc_read();
-        bool new_state = adc > threshold;
-        if (new_state != old_state) {
-            printf("%s [%u]\n", new_state ? "Motion" : "No motion", adc); 
-            old_state = new_state;
+        if (cli_motion_enabled()) {
+            uint32_t adc = sdk_system_adc_read();
+            bool new_state = adc > threshold;
+            if (new_state != old_state) {
+                if (new_state) {
+                    printf("Motion detected!\n");
+                    if (arducam_capture()) {
+                        arudcam_upload_fifo(cli_motion_upload_ip(), 8000);
+                    } else {
+                        printf("Error: capture failed\n");
+                    }
+                }
+                old_state = new_state;
+            }
+        } else {
+            old_state = false;
         }
         delay_ms(10);
-
-#if 0
-//        gpio_write(pir_pin, old_state);
-        __digitalWrite(pir_pin, old_state);
-        printf("%s\n", old_state ? "On" : "Off"); 
-        old_state = !old_state;
-        delay_ms(5000);
-#endif
     }
 }
 #endif // CONFIG_NO_PIR

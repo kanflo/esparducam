@@ -34,10 +34,40 @@
 #include <task.h>
 #include <arducam.h>
 #include <http_upload.h>
+#include "cli.h"
 #include "camdriver.h"
 
 
 #define MAX_ARGC (10)
+
+static bool motion_enabled = false;
+static char upload_ip[16];
+
+bool cli_motion_enabled(void)
+{
+    return motion_enabled;
+}
+
+char* cli_motion_upload_ip(void)
+{
+    return (char*) upload_ip;
+}
+
+static void cmd_motion(uint32_t argc, char *argv[])
+{
+    if (argc >= 2) {
+        motion_enabled = strcmp(argv[1], "on") == 0;
+        if (motion_enabled) {
+            if (argc == 3)
+                strcpy(upload_ip, argv[2]);
+            else
+                printf("Error: missing upload ip number.\n");
+        }
+    } else {
+        printf("Error: wrong number of parameters.\n");
+    }
+
+}
 
 static void cmd_capture(uint32_t argc, char *argv[])
 {
@@ -123,15 +153,20 @@ static void cmd_off(uint32_t argc, char *argv[])
 
 static void cmd_help(uint32_t argc, char *argv[])
 {
+    printf("motion:<on|off>[:<ip number>]         Enable/disable image upload on motion detection");
     printf("size:<size>                           Set JPEG size (see below)\n");
     printf("upload:<hostname>                     Capture and upload image to host\n");
     printf("capture                               Capture image to '/dev/null'\n");
     printf("on:<gpio number>[:<gpio number>]+     Set gpio to 1\n");
     printf("off:<gpio number>[:<gpio number>]+    Set gpio to 0\n");
     printf("\nExample:\n");
+
+    printf("  motion:on:172.16.3.107<enter> when motion is detected, captures and uploads image to host running server.py\n");
+    printf("  motion:off<enter> disable motion detection\n");
     printf("  upload:172.16.3.107<enter> captures and uploads image to host running server.py\n");
     printf("  on:0<enter> switches on gpio 0\n");
     printf("  on:0:2:4<enter> switches on gpios 0, 2 and 4\n");
+    printf("\n");
     printf("Valid JPEG sizes are:\n");
     printf("   160x120\n");
     printf("   320x240\n");
@@ -160,6 +195,7 @@ static void handle_command(char *cmd)
 
     if (strlen(argv[0]) > 0) {
         if (strcmp(argv[0], "help") == 0) cmd_help(argc, argv);
+        else if (strcmp(argv[0], "motion") == 0) cmd_motion(argc, argv);
         else if (strcmp(argv[0], "size") == 0) cmd_set_size(argc, argv);
         else if (strcmp(argv[0], "capture") == 0) cmd_capture(argc, argv);
         else if (strcmp(argv[0], "upload") == 0) cmd_capture_upload(argc, argv);

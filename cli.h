@@ -25,6 +25,10 @@
 #ifndef _CLI_H_
 #define _CLI_H_
 
+#include <stdbool.h>
+
 void cli_init(void);
+bool cli_motion_enabled(void);
+char* cli_motion_upload_ip(void);
 
 #endif // _CLI_H_
