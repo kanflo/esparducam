@@ -9,6 +9,7 @@ This repository contains code and schematics to build a development board joinin
 
 The board design allows for small breakout boards to be attached. There currently is [a breakout board the the RFM69C](https://github.com/kanflo/esparducam/tree/master/hardware/ism-boardlet), [an ESP12 board with pogo pins](https://github.com/kanflo/esparducam/tree/master/hardware/esp-pinlet) and [one for swappable ESP12 modules](https://github.com/kanflo/esparducam/tree/master/hardware/esp-boardlet).
 
+Oh, the accompanying blog posts are [here](http://johan.kanflo.com/building-a-low-cost-wifi-camera/) and [here](http://johan.kanflo.com/a-versatile-esp8266-development-board/).
 
 ###Usage
 
