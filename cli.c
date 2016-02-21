@@ -153,19 +153,21 @@ static void cmd_off(uint32_t argc, char *argv[])
 
 static void cmd_help(uint32_t argc, char *argv[])
 {
-    printf("motion:<on|off>[:<ip number>]         Enable/disable image upload on motion detection");
+    printf("motion:<on|off>[:<ip number>]         Enable/disable image upload on motion detection\n");
     printf("size:<size>                           Set JPEG size (see below)\n");
     printf("upload:<hostname>                     Capture and upload image to host\n");
-    printf("capture                               Capture image to '/dev/null'\n");
+    printf("capture                               Capture image to '/dev/null'. Used for FPS benchmarking\n");
     printf("on:<gpio number>[:<gpio number>]+     Set gpio to 1\n");
     printf("off:<gpio number>[:<gpio number>]+    Set gpio to 0\n");
     printf("\nExample:\n");
 
     printf("  motion:on:172.16.3.107<enter> when motion is detected, captures and uploads image to host running server.py\n");
     printf("  motion:off<enter> disable motion detection\n");
+    printf("  size:1600x1200<enter> set JPEG size to 1600x1200 pixels\n");
     printf("  upload:172.16.3.107<enter> captures and uploads image to host running server.py\n");
     printf("  on:0<enter> switches on gpio 0\n");
     printf("  on:0:2:4<enter> switches on gpios 0, 2 and 4\n");
+
     printf("\n");
     printf("Valid JPEG sizes are:\n");
     printf("   160x120\n");
