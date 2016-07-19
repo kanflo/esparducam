@@ -41,6 +41,8 @@
 #include "camdriver.h"
 #include "cli.h"
 #include "timeutils.h"
+#include "ota-tftp.h"
+#include "rboot-api.h"
 
 #include <ssid_config.h>
 
@@ -188,9 +190,18 @@ void server_task(void *p)
 void user_init(void)
 {
     sdk_uart_div_modify(0, UART_CLK_FREQ / 115200);
+    rboot_config conf = rboot_get_config();
     printf("\n\n\n");
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
+
+    printf("Currently running on flash slot %d / %d.\r\n\r\n", conf.current_rom, conf.count);
+    printf("Image addresses in flash:\r\n");
+    for(int i = 0; i <conf.count; i++) {
+        printf("%c%d: offset 0x%08x\r\n", i == conf.current_rom ? '*':' ', i, conf.roms[i]);
+    }
+
     cli_init();
+    ota_tftp_init_server(TFTP_PORT);
 
 #ifndef CONFIG_NO_WIFI
     struct sdk_station_config config = {
