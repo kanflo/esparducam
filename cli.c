@@ -232,6 +232,6 @@ static void cammon_task(void *p)
 
 void cli_init()
 {
-    xTaskCreate(&cammon_task, (signed char *) "cammon_task", 256, NULL, 2, NULL);
+    xTaskCreate(&cammon_task, "cammon_task", 256, NULL, 2, NULL);
 }
 
