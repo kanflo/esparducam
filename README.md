@@ -25,7 +25,6 @@ Add nedded extra modules to ESP Open RTOS ("EOR"):
 cd esp-open-rtos/extras
 git clone https://github.com/kanflo/eor-spi.git spi
 git clone https://github.com/kanflo/eor-spiflash.git spiflash
-git clone https://github.com/kanflo/eor-past.git past
 git clone https://github.com/kanflo/eor-http-upload.git http-upload
 ```
 
