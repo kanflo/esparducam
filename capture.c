@@ -214,8 +214,8 @@ void user_init(void)
     sdk_wifi_station_set_config(&config);
 #endif // CONFIG_NO_WIFI
 
-    xTaskCreate(&server_task, (signed char *) "server_task", 256, NULL, 2, NULL);
+    xTaskCreate(&server_task, "server_task", 256, NULL, 2, NULL);
 #ifndef CONFIG_NO_PIR
-    xTaskCreate(&pir_task, (signed char *) "pir_task", 256, NULL, 2, NULL);
+    xTaskCreate(&pir_task, "pir_task", 256, NULL, 2, NULL);
 #endif // CONFIG_NO_PIR
 }

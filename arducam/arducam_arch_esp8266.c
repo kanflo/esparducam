@@ -66,7 +66,7 @@ bool arducam_i2c_init(uint8_t sensor_addr)
 
 void arducam_delay_ms(uint32_t delay)
 {
-	vTaskDelay(delay / portTICK_RATE_MS);
+	vTaskDelay(delay / portTICK_PERIOD_MS);
 }
 
 void arducam_spi_write(uint8_t address, uint8_t value)

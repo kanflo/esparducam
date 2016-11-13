@@ -28,7 +28,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#define delay_ms(t) vTaskDelay((t) / portTICK_RATE_MS)
-#define systime_ms() (xTaskGetTickCount()*portTICK_RATE_MS)
+#define delay_ms(t) vTaskDelay((t) / portTICK_PERIOD_MS)
+#define systime_ms() (xTaskGetTickCount() * portTICK_PERIOD_MS)
 
 #endif // _TIMEUTILS_H_
