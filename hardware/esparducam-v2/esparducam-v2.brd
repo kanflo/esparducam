@@ -2030,7 +2030,7 @@ This connector mates with an FTDI adapter using a straight ribbon cable.</descri
 <element name="C5" library="SparkFun-Capacitors" package="0603-CAP" value="0.1uF" x="12.827" y="33.147" smashed="yes" rot="R180">
 <attribute name="VALUE" x="13.843" y="34.29" size="0.4064" layer="27" font="vector" rot="R180"/>
 </element>
-<element name="C6" library="SparkFun-Capacitors" package="0603-CAP" value="" x="31.369" y="6.604" smashed="yes" rot="R90">
+<element name="C6" library="SparkFun-Capacitors" package="0603-CAP" value="0.1uF" x="31.369" y="6.604" smashed="yes" rot="R90">
 <attribute name="VALUE" x="32.512" y="5.588" size="0.4064" layer="27" font="vector" rot="R90"/>
 </element>
 <element name="SJ1" library="SparkFun-Passives" package="PAD-JUMPER-2-NC_BY_PASTE_YES_SILK" value="JUMPER-PAD-2-NC_BY_PASTE" x="28.702" y="6.604" smashed="yes" rot="MR180"/>
