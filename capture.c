@@ -43,19 +43,12 @@
 #include "timeutils.h"
 #include "ota-tftp.h"
 #include "rboot-api.h"
+#include "config.h"
 
 #include <ssid_config.h>
 
-
-
-//#define CONFIG_NO_WIFI
-//#define CONFIG_NO_PIR
-
-#define ARDUCAM_PWR  (15) // Arducam Mini power enable
-
 #define BUF_SIZE (200)
 static char buffer[BUF_SIZE];
-
 
 
 #ifndef CONFIG_NO_PIR
@@ -97,12 +90,17 @@ void server_task(void *p)
     bool camera_ok = false;
 
     // Power cycle the the camera
-    gpio_enable(ARDUCAM_PWR, GPIO_OUTPUT);
+    gpio_enable(ARDUCAM_nPWR, GPIO_OUTPUT);
     printf("Camera power cycle\n");
-    gpio_write(ARDUCAM_PWR, 1);
+    gpio_write(ARDUCAM_nPWR, 1);
     delay_ms(250);
-    gpio_write(ARDUCAM_PWR, 0);
+    gpio_write(ARDUCAM_nPWR, 0);
     delay_ms(250);
+
+#ifdef CONFIG_TARGET_ESPARDUCAM_MINI
+    gpio_enable(LED_nPWR, GPIO_OUTPUT);
+    gpio_write(LED_nPWR, 1);
+#endif // CONFIG_TARGET_ESPARDUCAM_MINI
 
     camera_ok = arducam_setup();
     if (!camera_ok) {
@@ -158,6 +156,9 @@ void server_task(void *p)
 
                 sprintf(buffer, "HTTP/1.1 200 OK\nContent-Type: image/jpeg; charset=utf-8\nConnection: close\n\n");
 
+#ifdef CONFIG_TARGET_ESPARDUCAM_MINI
+                gpio_write(LED_nPWR, 0);
+#endif // CONFIG_TARGET_ESPARDUCAM_MINI
                 if (write(client_sock, buffer, strlen(buffer)) > 0) {
                     if (camera_ok) {
                         uint32_t retries = 4;
@@ -178,6 +179,9 @@ void server_task(void *p)
                         }
                     }
                 }
+#ifdef CONFIG_TARGET_ESPARDUCAM_MINI
+                gpio_write(LED_nPWR, 1);
+#endif // CONFIG_TARGET_ESPARDUCAM_MINI
 
                 if (recbytes <= 0) {
                     close(client_sock);

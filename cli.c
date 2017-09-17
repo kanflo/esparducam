@@ -36,6 +36,7 @@
 #include <http_upload.h>
 #include "cli.h"
 #include "camdriver.h"
+#include "config.h"
 
 
 #define MAX_ARGC (10)
@@ -66,7 +67,6 @@ static void cmd_motion(uint32_t argc, char *argv[])
     } else {
         printf("Error: wrong number of parameters.\n");
     }
-
 }
 
 static void cmd_capture(uint32_t argc, char *argv[])
@@ -123,6 +123,36 @@ static void cmd_capture_upload(uint32_t argc, char *argv[])
     }
 }
 
+static void cmd_power(uint32_t argc, char *argv[])
+{
+    if (argc == 2) {
+        gpio_write(ARDUCAM_nPWR, strcmp(argv[1], "off") == 0);
+    } else {
+        printf("Error: wrong number of parameters.\n");
+    }
+}
+
+static void cmd_init(uint32_t argc, char *argv[])
+{
+    if (arducam_setup())
+        printf("Camera init ok\n");
+    else
+        printf("Camera init failed!\n");
+}
+
+#ifdef CONFIG_TARGET_ESPARDUCAM_MINI
+static void cmd_led(uint32_t argc, char *argv[])
+{
+    if (argc == 2) {
+        gpio_enable(LED_nPWR, GPIO_OUTPUT);
+        gpio_write(LED_nPWR, strcmp(argv[1], "off") == 0);
+        printf("led:%d\n", strcmp(argv[1], "off") == 0);
+    } else {
+        printf("Error: wrong number of parameters.\n");
+    }
+}
+#endif // CONFIG_TARGET_ESPARDUCAM_MINI
+
 static void cmd_on(uint32_t argc, char *argv[])
 {
     if (argc >= 2) {
@@ -157,10 +187,14 @@ static void cmd_help(uint32_t argc, char *argv[])
     printf("size:<size>                           Set JPEG size (see below)\n");
     printf("upload:<hostname>                     Capture and upload image to host\n");
     printf("capture                               Capture image to '/dev/null'. Used for FPS benchmarking\n");
+#ifdef CONFIG_TARGET_ESPARDUCAM_MINI
+    printf("led:[on|off]                          Switch LED on or off\n");
+#endif // CONFIG_TARGET_ESPARDUCAM_MINI
+    printf("power:[on|off]                        Switch camera power on or off\n");
     printf("on:<gpio number>[:<gpio number>]+     Set gpio to 1\n");
     printf("off:<gpio number>[:<gpio number>]+    Set gpio to 0\n");
-    printf("\nExample:\n");
 
+    printf("\nExample:\n");
     printf("  motion:on:172.16.3.107<enter> when motion is detected, captures and uploads image to host running server.py\n");
     printf("  motion:off<enter> disable motion detection\n");
     printf("  size:1600x1200<enter> set JPEG size to 1600x1200 pixels\n");
@@ -201,6 +235,11 @@ static void handle_command(char *cmd)
         else if (strcmp(argv[0], "size") == 0) cmd_set_size(argc, argv);
         else if (strcmp(argv[0], "capture") == 0) cmd_capture(argc, argv);
         else if (strcmp(argv[0], "upload") == 0) cmd_capture_upload(argc, argv);
+#ifdef CONFIG_TARGET_ESPARDUCAM_MINI
+        else if (strcmp(argv[0], "led") == 0) cmd_led(argc, argv);
+#endif // CONFIG_TARGET_ESPARDUCAM_MINI
+        else if (strcmp(argv[0], "power") == 0) cmd_power(argc, argv);
+        else if (strcmp(argv[0], "init") == 0) cmd_init(argc, argv);
         else if (strcmp(argv[0], "on") == 0) cmd_on(argc, argv);
         else if (strcmp(argv[0], "off") == 0) cmd_off(argc, argv);
         else printf("Unknown command %s, try 'help'\n", argv[0]);

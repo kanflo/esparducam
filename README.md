@@ -9,7 +9,7 @@ This repository contains code and schematics to build a development board joinin
 
 The board design allows for small breakout boards to be attached. There currently is [a breakout board the the RFM69C](https://github.com/kanflo/esparducam/tree/master/hardware/ism-boardlet), [an ESP12 board with pogo pins](https://github.com/kanflo/esparducam/tree/master/hardware/esp-pinlet) and [one for swappable ESP12 modules](https://github.com/kanflo/esparducam/tree/master/hardware/esp-boardlet).
 
-Oh, the accompanying blog posts are [here](http://johan.kanflo.com/building-a-low-cost-wifi-camera/) and [here](http://johan.kanflo.com/a-versatile-esp8266-development-board/).
+Oh, the accompanying blog posts are [here](http://johan.kanflo.com/building-a-low-cost-wifi-camera/), [here](http://johan.kanflo.com/a-versatile-esp8266-development-board/) and [here](http://johan.kanflo.com/esparducam-mini/).
 
 ###Usage
 
@@ -42,11 +42,13 @@ cd esparducam
 make -j8 && make flash
 ```
 
+The repository is preconfigured for the Esparducam board. Check ```config.h``` for building for the Esparducam Mini.
+
 When flashing has completed, open a serial terminal to learn the IP number of your board. Open a web brower, point it to your IP and an image should be captured and displayed. While in the serial terminal, type ```help``` for a list of supported commands.
 
 Start the python script ```server.py``` and type ```upload:<your IP>``` to capture, upload and display an image on your computer.
 
-If you connect a [PIR module](http://www.ebay.com/sch/i.html?_trksid=PIR+module.TRS0&_nkw=PIR+module&_sacat=0) [eBay] to the JST connector you can use the command ```motion:on:<your ip>``` to have the board capture and upload an image when motion is detected.
+If you connect a [PIR module](http://www.ebay.com/sch/i.html?_trksid=PIR+module.TRS0&_nkw=PIR+module&_sacat=0) [eBay] to the JST connector of the Esparducam board you can use the command ```motion:on:<your ip>``` to have the board capture and upload an image when motion is detected. The Mini variant has a 3 pin slot for attaching a PIR but you need to check the pinout carefully. It should be VCC, OUT, GND but I have seen other combinations.
 
 ###Limitations
 
