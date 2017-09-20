@@ -39,8 +39,9 @@ static uint8_t _sensor_addr;
 
 //#define CONFIG_VERIFY
 
+#define I2C_BUS     (0)
 #define I2C_SDA_PIN (2)
-#define I2C_SCK_PIN (0) 
+#define I2C_SCL_PIN (0)
 
 
 static void spi_chip_select(uint8_t cs_pin);
@@ -59,7 +60,7 @@ bool arducam_spi_init(void)
 bool arducam_i2c_init(uint8_t sensor_addr)
 {
 	printf("arducam_i2c_init\n");
-	i2c_init(I2C_SCK_PIN, I2C_SDA_PIN);
+	i2c_init(I2C_BUS, I2C_SCL_PIN, I2C_SDA_PIN, I2C_FREQ_80K);
 	_sensor_addr = sensor_addr;
 	return true;
 }
@@ -103,13 +104,16 @@ uint8_t arducam_spi_read(uint8_t address)
 
 uint8_t arducam_i2c_write(uint8_t regID, uint8_t regDat)
 {
-	uint8_t data[] = {regID, regDat};
-	return i2c_slave_write(_sensor_addr, data, sizeof(data));
+	const uint8_t data[] = {regID, regDat};
+	return i2c_slave_write(I2C_BUS, _sensor_addr, 0, data, sizeof(data)) == 0;
 }
 
 uint8_t arducam_i2c_read(uint8_t regID, uint8_t* regDat)
 {
-	return i2c_slave_read(_sensor_addr, regID, regDat, 1);
+	const uint8_t data[] = {regID};
+	return i2c_slave_read(I2C_BUS, _sensor_addr, data, regDat, 1) == 0;
+
+int i2c_slave_read(uint8_t bus, uint8_t slave_addr, const uint8_t *data, uint8_t *buf, uint32_t len);
 }
 
 uint8_t arducam_i2c_write16(uint8_t regID, uint16_t regDat)

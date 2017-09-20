@@ -25,7 +25,6 @@
 #include <arducam.h>
 #include <unistd.h>
 #include <string.h>
-#include <lwip/sockets.h> // write(...) will dump to uart if this include is missing :-/
 #include <http_upload.h>
 #include "timeutils.h"
 #include "camdriver.h"
@@ -97,7 +96,7 @@ bool arducam_capture(void)
     return true;
 }
 
-void arudcam_fifo_to_socket(int client_sock)
+void arudcam_fifo_to_netcon(struct netconn *client)
 {
     uint8_t temp, temp_last = 0, buf_idx = 0;
     uint32_t fifo_size, bytes_read, start_time = systime_ms();
@@ -114,11 +113,10 @@ void arudcam_fifo_to_socket(int client_sock)
         temp_last = temp;
         temp = arducam_read_fifo();
         buffer[buf_idx++] = temp;
-        if (client_sock && buf_idx == BUF_SIZE) {
-            int res = write(client_sock, buffer, buf_idx);
-            if (res < 0) {
-                printf("\nERROR: write returned %d\n", res);
-                break;
+        if (client && buf_idx == BUF_SIZE) {
+            if (ERR_OK != netconn_write(client, buffer, buf_idx, NETCONN_COPY)) {
+                printf("netconn_write failed\n");
+                return;
             }
             buf_idx = 0;
         }
@@ -128,9 +126,10 @@ void arudcam_fifo_to_socket(int client_sock)
             break;
         }
     }
-    if (client_sock && buf_idx > 0) {
-        int res =  write(client_sock, buffer, buf_idx);
-        (void) res;
+    if (client && buf_idx > 0) {
+        if (ERR_OK != netconn_write(client, buffer, buf_idx, NETCONN_COPY)) {
+            printf("netconn_write failed\n");
+        }
     }
     printf("Done, read %u bytes in %ums\n", bytes_read, systime_ms()-start_time);
 }

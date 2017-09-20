@@ -25,6 +25,9 @@
 #ifndef _CAMDRIVER_H_
 #define _CAMDRIVER_H_
 
+#include <lwip/api.h>
+#include <lwip/sockets.h>
+
 #define OV2640_CHIPID_HIGH  0x0A
 #define OV2640_CHIPID_LOW   0x0B
 
@@ -34,8 +37,8 @@ bool arducam_setup(void);
 // Capture, return true if success
 bool arducam_capture(void);
 
-// Read FIFO and write to client socket
-void arudcam_fifo_to_socket(int client_sock);
+// Read FIFO and write to lwip netconn
+void arudcam_fifo_to_netcon(struct netconn *client);
 
 // Read FIFO and write to, well, nowhere
 void arudcam_fifo_to_devnull(void);

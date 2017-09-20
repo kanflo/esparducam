@@ -105,53 +105,36 @@ void server_task(void *p)
     camera_ok = arducam_setup();
     if (!camera_ok) {
         printf("Camera init failed!\n"); 
+        return;
     }
 
+    struct netconn *client = NULL;
+    struct netconn *nc = netconn_new(NETCONN_TCP);
+    if (nc == NULL) {
+        printf("Failed to allocate socket\n");
+        vTaskDelete(NULL);
+    }
+    netconn_bind(nc, IP_ADDR_ANY, 80);
+    netconn_listen(nc);
     while (1) {
-        struct sockaddr_in server_addr, client_addr;
-        int server_sock, client_sock;
-        socklen_t sin_size;
-        bzero(&server_addr, sizeof(struct sockaddr_in));
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port = htons(80);
+        err_t err = netconn_accept(nc, &client);
+        if (err == ERR_OK) {
+            struct netbuf *nb;
 
-        int recbytes;
+            ip_addr_t client_addr;
+            uint16_t port_ignore;
+            netconn_peer(client, &client_addr, &port_ignore);
+            printf("---\n");
+            printf("Client from %d.%d.%d.%d\n", ip4_addr1(&client_addr), ip4_addr2(&client_addr), ip4_addr3(&client_addr), ip4_addr4(&client_addr));
 
-        do {
-            if (-1 == (server_sock = socket(AF_INET, SOCK_STREAM, 0))) {
-                printf("Socket error\n");
-                break;
-            }
-
-            if (-1 == bind(server_sock, (struct sockaddr *)(&server_addr), sizeof(struct sockaddr))) {
-                printf("bind fail\n");
-                break;
-            }
-
-            printf(" bind port: %d\n", ntohs(server_addr.sin_port));
-
-            if (-1 == listen(server_sock, 5)) {
-                printf("listen fail\n");
-                break;
-            }
-
-            sin_size = sizeof(client_addr);
-
-            for (;;) {
-                if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
-                    printf("accept fail\n");
-                    continue;
-                }
-
-                printf("Client from %s:%d\n", inet_ntoa(client_addr.sin_addr), htons(client_addr.sin_port));
-
-                int opt = 50;
-                if (lwip_setsockopt(client_sock, SOL_SOCKET, SO_RCVTIMEO, &opt, sizeof(int)) < 0) {
-                    printf("failed to set timeout on socket\n");
-                }
-                while ((recbytes = read(client_sock, buffer, BUF_SIZE)) > 0) {
-                    buffer[recbytes] = 0;
+            if ((err = netconn_recv(client, &nb)) == ERR_OK) {
+                char *data;
+                uint16_t len;
+                err = netbuf_data(nb, (void*) &data, &len);
+                if (err == ERR_OK) {
+                    printf("Received %d bytes\n", len);
+                } else {
+                    printf("netbuf_data returned error %d\n", err);
                 }
 
                 sprintf(buffer, "HTTP/1.1 200 OK\nContent-Type: image/jpeg; charset=utf-8\nConnection: close\n\n");
@@ -159,35 +142,35 @@ void server_task(void *p)
 #ifdef CONFIG_TARGET_ESPARDUCAM_MINI
                 gpio_write(LED_nPWR, 0);
 #endif // CONFIG_TARGET_ESPARDUCAM_MINI
-                if (write(client_sock, buffer, strlen(buffer)) > 0) {
-                    if (camera_ok) {
-                        uint32_t retries = 4;
-                        bool success;
-                        while(retries--) {
-                            success = arducam_capture();
-                            if (success) {
-                                break;
-                            } else {
-                                printf("Capture retry\n"); 
-                                delay_ms(10); // Arbitrary value
-                            }
-                        }
+
+                netconn_write(client, buffer, strlen(buffer), NETCONN_COPY);
+
+                if (camera_ok) {
+                    uint32_t retries = 4;
+                    bool success;
+                    while(retries--) {
+                        success = arducam_capture();
                         if (success) {
-                            printf("Reading fifo\n"); 
-                            arudcam_fifo_to_socket(client_sock);
-                            printf("---\n");
+                            break;
+                        } else {
+                            printf("Capture retry\n");
+                            delay_ms(10); // Arbitrary value
                         }
+                    }
+                    if (success) {
+                        printf("Reading fifo\n");
+                        arudcam_fifo_to_netcon(client);
                     }
                 }
 #ifdef CONFIG_TARGET_ESPARDUCAM_MINI
                 gpio_write(LED_nPWR, 1);
 #endif // CONFIG_TARGET_ESPARDUCAM_MINI
-
-                if (recbytes <= 0) {
-                    close(client_sock);
-                }
             }
-        } while (0);
+            netbuf_delete(nb);
+        }
+        printf("Closing connection\n");
+        netconn_close(client);
+        netconn_delete(client);
     }
 }
 
