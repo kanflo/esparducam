@@ -11,7 +11,7 @@ The board design allows for small breakout boards to be attached. There currentl
 
 Oh, the accompanying blog posts are [here](http://johan.kanflo.com/building-a-low-cost-wifi-camera/), [here](http://johan.kanflo.com/a-versatile-esp8266-development-board/) and [here](http://johan.kanflo.com/esparducam-mini/).
 
-###Usage
+### Usage
 
 Clone the ESP Open RTOS repository. See the documentation for how to add your SSID name and password.
 
@@ -50,7 +50,7 @@ Start the python script ```server.py``` and type ```upload:<your IP>``` to captu
 
 If you connect a [PIR module](http://www.ebay.com/sch/i.html?_trksid=PIR+module.TRS0&_nkw=PIR+module&_sacat=0) [eBay] to the JST connector of the Esparducam board you can use the command ```motion:on:<your ip>``` to have the board capture and upload an image when motion is detected. The Mini variant has a 3 pin slot for attaching a PIR but you need to check the pinout carefully. It should be VCC, OUT, GND but I have seen other combinations.
 
-###Limitations
+### Limitations
 
 This is work in progress and there is currently very little error handling. Simultaneous clients will break the camera demo.
 
