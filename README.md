@@ -24,9 +24,10 @@ Add nedded extra modules to ESP Open RTOS ("EOR"):
 ```
 cd esp-open-rtos/extras
 git clone https://github.com/kanflo/eor-spi.git spi
-git clone https://github.com/kanflo/eor-spiflash.git spiflash
 git clone https://github.com/kanflo/eor-http-upload.git http-upload
 ```
+
+Someday I'll start using the native EOR SPI driver, you have to bear with me for now :)
 
 Set the environment variable ```$EOR_ROOT```to point to your EOR repository:
 
