@@ -1,0 +1,3 @@
+[submodule "uhej"]
+	path = uhej
+	url = git@github.com:kanflo/uhej.git

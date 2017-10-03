@@ -38,6 +38,7 @@
 #include <espressif/sdk_private.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "uhej.h"
 #include "camdriver.h"
 #include "cli.h"
 #include "timeutils.h"
@@ -105,7 +106,21 @@ void server_task(void *p)
     camera_ok = arducam_setup();
     if (!camera_ok) {
         printf("Camera init failed!\n"); 
-        return;
+        while (1) {
+#ifdef CONFIG_TARGET_ESPARDUCAM_MINI
+            gpio_write(LED_nPWR, 1);
+            delay_ms(1000);
+            gpio_write(LED_nPWR, 0);
+#endif // CONFIG_TARGET_ESPARDUCAM_MINI
+            delay_ms(1000);
+        }
+    }
+
+    if (!(uhej_server_init() &&
+        uhej_announce_udp("tftp", 69) &&
+        uhej_announce_udp("esparducam", 80)))
+    {
+       printf("uHej registration failed\n");
     }
 
     struct netconn *client = NULL;
@@ -201,7 +216,7 @@ void user_init(void)
     sdk_wifi_station_set_config(&config);
 #endif // CONFIG_NO_WIFI
 
-    xTaskCreate(&server_task, "server_task", 256, NULL, 2, NULL);
+    xTaskCreate(&server_task, "server_task", 512, NULL, 2, NULL);
 #ifndef CONFIG_NO_PIR
     xTaskCreate(&pir_task, "pir_task", 256, NULL, 2, NULL);
 #endif // CONFIG_NO_PIR
