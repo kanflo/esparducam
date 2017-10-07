@@ -30,6 +30,7 @@ import cgi
 import shutil
 import mimetypes
 import re
+import socket
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -301,4 +302,9 @@ def test(HandlerClass = SimpleHTTPRequestHandler,
     BaseHTTPServer.test(HandlerClass, ServerClass)
 
 if __name__ == '__main__':
+    ip = socket.gethostbyname(socket.gethostname())
+    if ip == "127.0.0.1":
+        print("You should remove your hostname from /etc/hosts")
+    else:
+        print("Tell your Esparducam to connect to %s" % ip)
     test()
