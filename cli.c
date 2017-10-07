@@ -246,22 +246,25 @@ static void handle_command(char *cmd)
     }
 }
 
-static void cammon_task(void *p)
+static void command_task(void *p)
 {
     char ch;
     char cmd[81];
     int i = 0;
     printf("\n\n\nWelcome to camera mon. Type 'help<enter>' for, well, help\n");
     printf("%% ");
+    fflush(stdout); // stdout is line buffered
     while(1) {
         if (read(0, (void*)&ch, 1)) { // 0 is stdin
             printf("%c", ch);
+            fflush(stdout);
             if (ch == '\n' || ch == '\r') {
                 cmd[i] = 0;
                 i = 0;
                 printf("\n");
                 handle_command((char*) cmd);
                 printf("%% ");
+                fflush(stdout);
             } else {
                 if (i < sizeof(cmd)) cmd[i++] = ch;
             }
@@ -271,6 +274,6 @@ static void cammon_task(void *p)
 
 void cli_init()
 {
-    xTaskCreate(&cammon_task, "cammon_task", 256, NULL, 2, NULL);
+    xTaskCreate(&command_task, "command_task", 512, NULL, 2, NULL);
 }
 
