@@ -38,7 +38,7 @@ export EOR_ROOT=/path/to/esp-open-rtos
 Clone this repository, make and flash:
 
 ```
-git clone https://github.com/kanflo/esparducam.git
+git clone --recursive https://github.com/kanflo/esparducam.git
 cd esparducam
 make -j8 && make flash
 ```
@@ -56,4 +56,5 @@ If you connect a [PIR module](http://www.ebay.com/sch/i.html?_trksid=PIR+module.
 This is work in progress and there is currently very little error handling. Simultaneous clients will break the camera demo.
 
 -
+
 Licensed under the MIT license. Have fun!
